@@ -16,6 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final taskcontroler = TextEditingController();
+
   Future<void> init() async {
     var databasesPath = await getDatabasesPath();
     String path = '$databasesPath demo.db';
@@ -33,20 +35,18 @@ class _HomePageState extends State<HomePage> {
 
 // Insert some records in a transaction
     await database.transaction((txn) async {
-      int id1 = await txn.rawInsert(
-          'INSERT INTO Test(name, value, num) VALUES("some name", 1234, 456.789)');
-      print('inserted1: $id1');
+      // int id1 = await txn.rawInsert(
+      //     'INSERT INTO Test(name, value, num) VALUES("some name", 1234, 456.789)');
+
       int id2 = await txn.rawInsert(
           'INSERT INTO Test(name, value, num) VALUES(?, ?, ?)',
-          ['another name', 12345678, 3.1416]);
-      print('inserted2: $id2');
+          ['$taskcontroler.text', 12345678, 3.1416]);
     });
 
 // Update some record
     int count = await database.rawUpdate(
         'UPDATE Test SET name = ?, value = ? WHERE name = ?',
         ['updated name', '9876', 'some name']);
-    print('updated: $count');
 
 // Get the records
     List<Map> list = await database.rawQuery('SELECT * FROM Test');
@@ -58,20 +58,20 @@ class _HomePageState extends State<HomePage> {
     print(expectedList);
 
 // Delete a record
-    count = await database
-        .rawDelete('DELETE FROM Test WHERE name = ?', ['another name']);
-    assert(count == 1);
+    // count = await database
+    //     .rawDelete('DELETE FROM Test WHERE name = ?', ['another name']);
+    // assert(count == 1);
 
 // Close the database
     await database.close();
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    init();
-  }
+  // @override
+  // void initState() {
+  //   // TODO: implement initState
+  //   super.initState();
+  //   init();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +79,23 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text(''),
       ),
-      body: Container(),
+      body: Container(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          children: [
+            TextField(
+              controller: taskcontroler,
+              decoration: const InputDecoration(hintText: 'Escreva sua tarefa'),
+            ),
+            MaterialButton(
+              onPressed: () {
+                init();
+              },
+              child: const Text('salvar'),
+            )
+          ],
+        ),
+      ),
     );
   }
 }
